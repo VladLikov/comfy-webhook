@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -8,19 +9,20 @@ def receive_webhook():
     print("📩 Получен webhook от ComfyOnline:")
     print(data)
 
+    # Логика обработки webhook
     task_id = data.get("task_id")
     status = data.get("status")
     output = data.get("output", {})
-    urls = output.get("output_url_list", [])
+    error_message = data.get("error_message")
 
-    if status == "COMPLETED" and urls:
-        print(f"✅ Задача {task_id} завершена. Ссылка на изображение: {urls[0]}")
-    elif status == "FAILED":
-        print(f"❌ Задача {task_id} не удалась. Ошибка: {data.get('error_message')}")
-    else:
-        print(f"ℹ️ Задача {task_id} в статусе: {status}")
+    print(f"📦 Task ID: {task_id}")
+    print(f"🧩 Status: {status}")
+    print(f"🖼️ Output: {output.get('output_url_list')}")
+    if error_message:
+        print(f"❌ Ошибка: {error_message}")
 
     return jsonify({"success": True})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001)
+    port = int(os.environ.get("PORT", 5000))  # Railway автоматически задаёт PORT
+    app.run(host="0.0.0.0", port=port)
